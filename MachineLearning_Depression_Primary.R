@@ -347,14 +347,13 @@ model_labels <- c(
   interact6_logistic = "Logistic, no covariates"
 )
 
-# Use beta calibration on the best performing model to measure performance with and without calibration
+# Use iso calibration on the best performing model to measure performance with and without calibration
 # With thanks to: www.tidymodels.org/learn/models/calibration/
-beta_val <- cal_validate_beta(resample_list_depression$interact5_rf, 
-                              metrics = metric_set(roc_auc), 
+iso_val <- cal_validate_isotonic_boot(resample_list_depression_read$interact5_rf, 
                               save_pred = TRUE, 
                               times = 25)
-cell_cal <- cal_estimate_beta(resample_list_depression$interact5_rf)           # Calculate new probabilities
-cal_fit <- wf_list_depression_read$interact5_rf %>% 
+cell_cal <- cal_estimate_isotonic_boot(resample_list_depression_read$interact5_rf)           # Calculate new probabilities
+cal_fit <- wf_list_depression_read$interact3_knn %>% 
   fit(data = train_data_depression_read)
 cell_test_pred <- augment(cal_fit, 
                           new_data = test_data_depression_read)
@@ -374,7 +373,7 @@ cell_test_cal_pred %>% my_metrics(truth = depression, estimate = .pred_class)
 cell_test_cal_pred %>% prob_metrics(truth = depression, .pred_Depression)
 
 # Plot the uncalibrated model
-cell_plot_1 <- cal_plot_windowed(resample_list_depression$interact5_rf, step_size = 0.025) +
+cell_plot_1 <- cal_plot_windowed(resample_list_depression_read$interact5_rf, step_size = 0.025) +
   labs(
     title = "Uncalibrated") +
   theme(
@@ -397,11 +396,11 @@ cell_plot_2 <- cell_test_cal_pred %>%
 # Plot both models together
 cell_plot_1 + cell_plot_2 +
   plot_annotation(
-    title = "Beta calibration of the depression model",
+    title = "Iso calibration of the depression model - random forest",
     theme = theme(plot.title = element_text(size = 30)))
 
 # Collect predictions of the best performing model
-collect <- collect_predictions(final_fit_depression_read$interact5_rf)
+collect <- collect_predictions(final_fit_depression_read$interact3_knn)
 
 # Convert class probability estimates to class_pred objects and use the normally used threshold
 collect_thresh <- collect %>%
@@ -416,8 +415,8 @@ collect_pred <- collect %>%
   mutate(.pred = make_two_class_pred(
     estimate = .pred_Depression,
     levels = levels(depression),
-    threshold = 0.30,
-    buffer = 0.1
+    threshold = 0.6,
+    buffer = 0.05
   ))
 
 # Collect predictions and reportable rate of the model with removed equivocal zones

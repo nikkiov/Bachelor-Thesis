@@ -141,6 +141,9 @@ saveRDS(initial_split_sleep, file="Bachelor Thesis/Processed/initial_split_sleep
 saveRDS(train_data_sleep, file="Bachelor Thesis/Processed/train_data_sleep_primary.rds")
 saveRDS(test_data_sleep, file="Bachelor Thesis/Processed/test_data_sleep_primary.rds")
 
+train_data_sleep_read <- readRDS("Bachelor Thesis/Processed/train_data_sleep_primary.rds")
+test_data_sleep_read <- readRDS("Bachelor Thesis/Processed/test_data_sleep_primary.rds")
+
 # Make the recipes: different features, different over_ratios and different interaction terms
 basic_recipe_sleep <-
   recipe(sleep_problems ~ IS + IV + RA + amplitude + corrected_rad_acro + mesor + age + gender + race + education + household_size + no_light_heavy_drinker + heavy_smoker_yes_no + BMI + employed, data = train_data_sleep) %>%
@@ -347,16 +350,16 @@ model_labels <- c(
   interact2_logistic = "Logistic, no covariates"
 )
 
-# Use beta calibration on the best performing model to measure performance with and without calibration
+# Use iso calibration on the best performing model to measure performance with and without calibration
 # With thanks to: www.tidymodels.org/learn/models/calibration/
-beta_val <- cal_validate_beta(resample_list_sleep$none_logistic, 
+iso_val <- cal_validate_isotonic_boot(resample_list_sleep_read$none_logistic, 
                               save_pred = TRUE, 
                               times = 25)
-cell_cal <- cal_estimate_beta(resample_list_sleep$none_logistic)               # Calculate new probabilities
-cal_fit <- wf_list_sleep$none_logistic %>% 
-  fit(data = train_data_sleep)
+cell_cal <- cal_estimate_isotonic_boot(resample_list_sleep_read$none_logistic)               # Calculate new probabilities
+cal_fit <- wf_list_sleep_read$none_logistic %>% 
+  fit(data = train_data_sleep_read)
 cell_test_pred <- augment(cal_fit, 
-                          new_data = test_data_sleep)
+                          new_data = test_data_sleep_read)
 my_metrics <- metric_set(f_meas, accuracy, specificity, precision, recall)
 prob_metrics <- metric_set(roc_auc)
 cell_test_pred %>% my_metrics(truth = sleep_problems, 
@@ -372,7 +375,7 @@ cell_test_cal_pred %>% my_metrics(truth = sleep_problems, estimate = .pred_class
 cell_test_cal_pred %>% prob_metrics(truth = sleep_problems, .pred_Sleep_disturbances)
 
 # Plot the uncalibrated model
-cell_plot_1 <- cal_plot_windowed(resample_list_sleep$none_logistic, step_size = 0.025) +
+cell_plot_1 <- cal_plot_windowed(resample_list_sleep_read$none_logistic, step_size = 0.025) +
   labs(
     title = "Uncalibrated") +
   theme(
@@ -395,7 +398,7 @@ cell_plot_2 <- cell_test_cal_pred %>%
 # Plot both models together
 cell_plot_1 + cell_plot_2 +
   plot_annotation(
-    title = "Beta calibration of the sleep disturbances model",
+    title = "Iso calibration of the sleep disturbances model",
     theme = theme(plot.title = element_text(size = 30)))
 
 # Collect predictions of the best performing model
