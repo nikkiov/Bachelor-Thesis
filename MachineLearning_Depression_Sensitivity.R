@@ -127,6 +127,7 @@ circadian_data_percentile %>%
         legend.position = "bottom")
 
 # Set seed in order to create reproducible results
+# With thanks to: https://juliasilge.com/blog/ikea-prices/
 set.seed(155)
 
 # Split the data based on depression strata, on a 80/20 ratio and create a training and testing dataset
@@ -200,14 +201,15 @@ rf_mod <- rand_forest(
   set_engine("randomForest")
 
 # Make lists of the different preprocessing steps and the models
+# With thanks to: https://workflowsets.tidymodels.org/reference/workflow_map.html
 prepoc_depression_sensitivity <- list(none = basic_recipe_depression_sensitivity, interact1 = interact1_recipe_depression_sensitivity, interact2 = interact2_recipe_depression_sensitivity, interact3 = interact3_recipe_depression_sensitivity, interact4 = interact4_recipe_depression_sensitivity, interact5 = interact5_recipe_depression_sensitivity, interact6 = interact6_recipe_depression_sensitivity, interact7 = interact7_recipe_depression_sensitivity)
 models <- list(knn = knn_mod, logistic = lr_mod, rf = rf_mod)
 
 # Make an interface for investigating multiple models and preprocessing steps
 cell_set_depression_sensitivity <- workflow_set(prepoc_depression_sensitivity, models, cross = TRUE)
 
-# Execute the same function across all workflows and evaluates them on the accuracy, precision, recall, F1-score and specificity. 
-# It also extracts the underlying model object from each model for later use.
+# Execute the same function across all workflows and evaluates them on the accuracy, precision, recall, F1-score and specificity
+# It also extracts the underlying model object from each model for later use
 results_depression_sensitivity <- cell_set_depression_sensitivity %>%
   workflow_map(
     resamples = vfold_cv(train_data_depression_sensitivity, strata = depression),
@@ -399,6 +401,7 @@ cell_plot_1 + cell_plot_2 +
     theme = theme(plot.title = element_text(size = 30)))
 
 # Collect predictions of the best performing model
+# With thanks to: https://probably.tidymodels.org/articles/equivocal-zones.html
 collect <- collect_predictions(final_fit_depression_sensitivity_read$interact5_rf)
 
 # Convert class probability estimates to class_pred objects and use the normally used threshold
@@ -460,15 +463,6 @@ for (model_name in selected_models){
     dplyr::pull(.estimate)
   auc_data_depression_sensitivity[[model_name]] <- auc
 }
-
-# Plot ROC-curves for the best performing models
-roc_all_depression_sensitivity <- imap_dfr(roc_depression_sensitivity[names(roc_depression_sensitivity) %in% selected_models], ~ mutate(.x, model = model_labels[.y]))
-ggplot(roc_all_depression_sensitivity, aes(x = 1 - specificity, y = sensitivity)) +
-  geom_line() +
-  geom_abline(intercept = 0, slope = 1, linetype = "dotted", color = "gray50") +
-  facet_wrap(~ model) +
-  labs(title = "ROC curve - Depression, sensitivity dataset") +
-  theme(text = element_text(size = 16))
 
 # Plot a variable importance plot (vip) of the best performing model
 vip1 <- vip(vip_depression_sensitivity_read$interact5_rf, num_features = 20) +
