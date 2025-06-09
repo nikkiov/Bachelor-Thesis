@@ -208,8 +208,9 @@ models <- list(knn = knn_mod, logistic = lr_mod, rf = rf_mod)
 # Make an interface for investigating multiple models and preprocessing steps
 cell_set_depression <- workflow_set(prepoc_depression, models, cross = TRUE)
 
-# Execute the same function across all workflows and evaluates them on the accuracy, precision, recall, F1-score and specificity. 
-# It also extracts the underlying model object from each model for later use.
+# Execute the same function across all workflows and evaluates them on the accuracy, precision, recall, F1-score and specificity
+# It also extracts the underlying model object from each model for later use
+# With thanks to: https://workflowsets.tidymodels.org/reference/workflow_map.html
 results_depression <- cell_set_depression %>%
   workflow_map(
     resamples = vfold_cv(train_data_depression, strata = depression),
