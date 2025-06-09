@@ -127,6 +127,7 @@ circadian_data %>%
         legend.position = "bottom")
 
 # Set seed in order to create reproducible results
+# With thanks to: https://juliasilge.com/blog/ikea-prices/
 set.seed(124)
 
 # Split the data based on depression strata, on a 80/20 ratio and create a training and testing dataset
@@ -202,6 +203,7 @@ rf_mod <- rand_forest(
   set_engine("randomForest")
 
 # Make lists of the different preprocessing steps and the models
+# With thanks to: https://workflowsets.tidymodels.org/reference/workflow_map.html
 prepoc_depression <- list(none = basic_recipe_depression, interact1 = interact1_recipe_depression, interact2 = interact2_recipe_depression, interact3 = interact3_recipe_depression, interact4 = interact4_recipe_depression, interact5 = interact5_recipe_depression, interact6 = interact6_recipe_depression, interact7 = interact7_recipe_depression)
 models <- list(knn = knn_mod, logistic = lr_mod, rf = rf_mod)
 
@@ -210,7 +212,6 @@ cell_set_depression <- workflow_set(prepoc_depression, models, cross = TRUE)
 
 # Execute the same function across all workflows and evaluates them on the accuracy, precision, recall, F1-score and specificity
 # It also extracts the underlying model object from each model for later use
-# With thanks to: https://workflowsets.tidymodels.org/reference/workflow_map.html
 results_depression <- cell_set_depression %>%
   workflow_map(
     resamples = vfold_cv(train_data_depression, strata = depression),
@@ -401,6 +402,7 @@ cell_plot_1 + cell_plot_2 +
     theme = theme(plot.title = element_text(size = 30)))
 
 # Collect predictions of the best performing model
+# With thanks to: https://probably.tidymodels.org/articles/equivocal-zones.html
 collect <- collect_predictions(final_fit_depression_read$interact3_knn)
 
 # Convert class probability estimates to class_pred objects and use the normally used threshold
@@ -462,15 +464,6 @@ for (model_name in selected_models){
     dplyr::pull(.estimate)
   auc_data_depression[[model_name]] <- auc
 }
-
-# Plot ROC-curves for the best performing models
-roc_all_depression <- imap_dfr(roc_depression[names(roc_depression) %in% selected_models], ~ mutate(.x, model = model_labels[.y]))
-ggplot(roc_all_depression, aes(x = 1 - specificity, y = sensitivity)) +
-  geom_line() +
-  geom_abline(intercept = 0, slope = 1, linetype = "dotted", color = "gray50") +
-  facet_wrap(~ model) +
-  labs(title = "ROC curve - Depression, primary dataset") +
-  theme(text = element_text(size = 16))
 
 # Plot a variable importance plot (vip) of the best performing model
 vip1 <- vip(vip_depression_read2$interact5_rf, num_features = 20) +
