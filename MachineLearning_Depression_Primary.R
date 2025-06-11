@@ -349,12 +349,12 @@ model_labels <- c(
   interact6_logistic = "Logistic, no covariates"
 )
 
-# Use iso calibration on the best performing model to measure performance with and without calibration
+# Use logistic regression calibration on the best performing model to measure performance with and without calibration
 # With thanks to: www.tidymodels.org/learn/models/calibration/
-iso_val <- cal_validate_isotonic_boot(resample_list_depression_read$interact5_rf, 
+log_val <- cal_validate_logistic(resample_list_depression_read$interact3_knn, 
                               save_pred = TRUE, 
                               times = 25)
-cell_cal <- cal_estimate_isotonic_boot(resample_list_depression_read$interact5_rf)           # Calculate new probabilities
+cell_cal <- cal_estimate_logistic(resample_list_depression_read$interact3_knn)           # Calculate new probabilities
 cal_fit <- wf_list_depression_read$interact3_knn %>% 
   fit(data = train_data_depression_read)
 cell_test_pred <- augment(cal_fit, 
