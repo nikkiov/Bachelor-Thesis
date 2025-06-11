@@ -375,7 +375,7 @@ cell_test_cal_pred %>% my_metrics(truth = depression, estimate = .pred_class)
 cell_test_cal_pred %>% prob_metrics(truth = depression, .pred_Depression)
 
 # Plot the uncalibrated model
-cell_plot_1 <- cal_plot_windowed(resample_list_depression_read$interact5_rf, step_size = 0.025) +
+cell_plot_1 <- cal_plot_windowed(resample_list_depression_read$interact3_knn, step_size = 0.025) +
   labs(
     title = "Uncalibrated") +
   theme(
