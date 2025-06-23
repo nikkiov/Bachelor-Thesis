@@ -37,7 +37,7 @@ combined_data$HEADER_TIME_STAMP <- as.POSIXct(combined_data$HEADER_TIME_STAMP, t
 
 # Get all data from one day
 plot_data <- combined_data %>%
-  filter(as.Date(HEADER_TIME_STAMP) == as.Date("2000-01-09"))
+  filter(as.Date(HEADER_TIME_STAMP) == as.Date("2000-01-13"))
 
 # Plot the x-axis
 plot_x <- ggplot(plot_data, aes(x=HEADER_TIME_STAMP, y=X)) +
@@ -152,7 +152,7 @@ cosinor_plot <- ggplot_cosinor.lm(cosinor_lm) +
   labs(x = "Time since start of the day (hours)", y = "ENMO_t (g)") &
   plot_annotation(title = "Fitted Cosine, Summarized Over 7 Days, Showing MESOR, Acrophase and Amplitude (Participant ID: 61289)") &
     theme(text = element_text(size=20),
-          plot.title = element_text(size = 24),
+          plot.title = element_text(size = 23),
           axis.text.y = element_text(size = 12),
           axis.text.x = element_text(size = 16))
 
@@ -183,17 +183,16 @@ npar_analysis <- summary_result %>%
 edited_npar_analysis <- npar_analysis %>%
   group_by(date = as.Date(time)) %>%
   filter(n_distinct(hour(time)) == 24) %>%
-  ungroup() %>%
-  select(time = time, hour, minute, activity = ENMO, date, plot_time)
+  ungroup()
 
 # Summarize the data per day and hour
 npar_plot_data <- edited_npar_analysis %>%
   group_by(date = as.Date(time), hour) %>%
-  summarise(activity = mean(activity)) 
+  summarise(ENMO = mean(ENMO)) 
 
 npar_plot_data <- npar_plot_data %>%
   group_by(hour) %>%
-  summarise(activity = mean(activity)) 
+  summarise(ENMO = mean(ENMO)) 
 
 # Change the matrix format for later plotting
 activity_matrix <- as.matrix(edited_npar_analysis)
@@ -203,7 +202,7 @@ activity_data <- as.numeric(activity_data)
 combined_matrix <- cbind(time_data, activity_data)
 
 # Plot the summarized actigraphy data for one participant
-npar_1 <- ggplot(npar_plot_data, aes(x = hour, y = activity)) +
+npar_1 <- ggplot(npar_plot_data, aes(x = hour, y = ENMO)) +
   geom_col() +
   labs(title = "Actigraphy Plot, 24 Hours (Participant ID: 62189)", subtitle = "Average across days", x = "Time (start: 00:00)", y = "Movement Intensity")  +
   theme(text = element_text(size=20),
@@ -228,16 +227,15 @@ npar_analysis2 <- summary_result2 %>%
 edited_npar_analysis2 <- npar_analysis2 %>%
   group_by(date = as.Date(time)) %>%
   filter(n_distinct(hour(time)) == 24) %>%
-  ungroup() %>%
-  select(time = time, hour, minute, activity = ENMO, date, plot_time)
+  ungroup()
 
 npar_plot_data2 <- edited_npar_analysis2 %>%
   group_by(date = as.Date(time), hour) %>%
-  summarise(activity = mean(activity)) 
+  summarise(ENMO = mean(ENMO)) 
 
 npar_plot_data2 <- npar_plot_data2 %>%
   group_by(hour) %>%
-  summarise(activity = mean(activity)) 
+  summarise(ENMO = mean(ENMO)) 
 
 # Summarize the actigraphy data for the third participant
 summary_result3 <- read_csv("Bachelor Thesis/Summarized Data/63033.csv")
@@ -256,20 +254,19 @@ npar_analysis3 <- summary_result3 %>%
 edited_npar_analysis3 <- npar_analysis3 %>%
   group_by(date = as.Date(time)) %>%
   filter(n_distinct(hour(time)) == 24) %>%
-  ungroup() %>%
-  select(time = time, hour, minute, activity = ENMO, date, plot_time)
+  ungroup()
 
 npar_plot_data3 <- edited_npar_analysis3 %>%
   group_by(date = as.Date(time), hour) %>%
-  summarise(activity = mean(activity)) 
+  summarise(ENMO = mean(ENMO)) 
 
 npar_plot_data3 <- npar_plot_data3 %>%
   group_by(hour) %>%
-  summarise(activity = mean(activity)) 
+  summarise(ENMO = mean(ENMO)) 
 
 
 # Plot the data for participant 62189 (depression)
-plot_1 <- ggplot(edited_npar_analysis, aes(x = plot_time, y = activity)) +
+plot_1 <- ggplot(edited_npar_analysis, aes(x = plot_time, y = ENMO)) +
   geom_line() +
   facet_grid(date ~ ., scales = "free_y") +
   labs(title = "Depression (62189)", x = "Time (clock hour)", y = NULL) +
@@ -284,7 +281,7 @@ plot_1 <- ggplot(edited_npar_analysis, aes(x = plot_time, y = activity)) +
   )
 
 # Plot the data for participant 67442 (healthy)
-plot_2 <- ggplot(edited_npar_analysis2, aes(x = plot_time, y = activity)) +
+plot_2 <- ggplot(edited_npar_analysis2, aes(x = plot_time, y = ENMO)) +
   geom_line() +
   facet_grid(date ~ ., scales = "free_y") +
   labs(title = "Healthy controls (67442)", x = "Time (clock hour)", y = "ENMO_t (g)") +
@@ -299,7 +296,7 @@ plot_2 <- ggplot(edited_npar_analysis2, aes(x = plot_time, y = activity)) +
   )
 
 # Plot the data for participant 63033 (sleep disturbances)
-plot_3 <- ggplot(edited_npar_analysis3, aes(x = plot_time, y = activity)) +
+plot_3 <- ggplot(edited_npar_analysis3, aes(x = plot_time, y = ENMO)) +
   geom_line() +
   facet_grid(date ~ ., scales = "free_y") +
   labs(title = "Sleep disturbances (63033)", x = "Time (clock hour)", y = NULL) +
@@ -319,7 +316,7 @@ combined_plot <- plot_2 + plot_1 + plot_3 + plot_layout(nrow =1) +
                   theme = theme(plot.title = element_text(size = 30)))
 
 # Plot the summarized data for participant 62189 (depression)
-npar_1 <- ggplot(npar_plot_data, aes(x = hour, y = activity)) +
+npar_1 <- ggplot(npar_plot_data, aes(x = hour, y = ENMO)) +
   geom_col() +
   labs(title = "Depression (62189)", x = "Time (start: 00:00)", y = NULL)  +
   theme(text = element_text(size=20),
@@ -327,15 +324,15 @@ npar_1 <- ggplot(npar_plot_data, aes(x = hour, y = activity)) +
         axis.text.x = element_text(size = 16))
 
 # Plot the summarized data for participant 67442 (healthy)
-npar_2 <- ggplot(npar_plot_data2, aes(x = hour, y = activity)) +
+npar_2 <- ggplot(npar_plot_data2, aes(x = hour, y = ENMO)) +
 geom_col() +
   labs(title = "Healthy controls (67442)", x = "Time (start: 00:00)", y = "Movement Intensity")  +
   theme(text = element_text(size=20),
         axis.text.y = element_text(size = 12),
         axis.text.x = element_text(size = 16))
 
-# # Plot the summarized data for participant 63033 (sleep disturbances)
-npar_3 <- ggplot(npar_plot_data3, aes(x = hour, y = activity)) +
+# Plot the summarized data for participant 63033 (sleep disturbances)
+npar_3 <- ggplot(npar_plot_data3, aes(x = hour, y = ENMO)) +
   geom_col() +
   labs(title = "Sleep disturbances (63033)", x = "Time (start: 00:00)", y = NULL)  +
   theme(text = element_text(size=20),
@@ -345,6 +342,128 @@ npar_3 <- ggplot(npar_plot_data3, aes(x = hour, y = activity)) +
 # Combine the summarized plots from all three participants
 combined_plot2 <- npar_2 + npar_1 + npar_3 + plot_layout(nrow =1) +
   plot_annotation(
-    title = "Actigraphy plot, average over days for three different participants",
+    title = "Actigraphy plot, average across days for three different participants",
     theme = theme(plot.title = element_text(size = 30)))
 
+# Read participant information
+output <- read_csv("Bachelor Thesis/Processed/output.csv")
+output <- output %>%
+  mutate(
+    group = case_when(
+      sleep_problems == 1 & depression == 1 ~ "Both",
+      sleep_problems == 1 & depression == 0 ~ "Sleep disturbances",
+      sleep_problems == 0 & depression == 1 ~ "Depression",
+      TRUE ~ "Healthy controls"
+    )
+  )
+
+# Make three different lists of data based on groups
+depression_data <- list()
+sleep_disturbances_data <- list()
+both_data <- list()
+healthy_controls_data <- list()
+
+# Read .csv files and summarize data
+for (file in dir_ls("Bachelor Thesis/Summarized Data")){
+  
+  # Get SEQN from .csv file
+  seqn <- as.numeric(gsub("[^0-9]", "", basename(file)))
+  
+  # Pull group from SEQN
+  group <- output %>%
+    filter(SEQN == seqn) %>%
+    pull(group)
+    
+  # Read and process data
+  summary_result <- read_csv(file)
+  
+  npar_analysis <- summary_result %>%  
+    mutate(
+      time = as.POSIXct(time, format = "%Y-%m-%dT%H:%M:%SZ"),
+      ENMO = as.numeric(ENMO_t),
+      hour = hour(time),
+      minute = minute(time),
+      time_only = hms(format(time, "%H:%M:%S")),
+      plot_time = as.POSIXct("1970-01-01") + time_only
+    ) %>%
+    na.omit()
+  
+  edited_npar_analysis <- npar_analysis %>%
+    group_by(date = as.Date(time)) %>%
+    filter(n_distinct(hour(time)) == 24) %>%
+    ungroup()
+  
+  npar_plot_data <- edited_npar_analysis %>%
+    group_by(date = as.Date(time), hour) %>%
+    summarise(ENMO = mean(ENMO)) 
+  
+  npar_plot_data <- npar_plot_data %>%
+    group_by(hour) %>%
+    summarise(ENMO = mean(ENMO)) 
+  
+  # Put summarized data in the right group
+  if (group == "Both"){
+    both_data[[file]] <- npar_plot_data}
+  else if (group == "Depression"){
+    depression_data[[file]] <- npar_plot_data}
+  else if (group == "Sleep disturbances"){
+    sleep_disturbances_data[[file]] <- npar_plot_data}
+  else{
+    healthy_controls_data[[file]] <- npar_plot_data}
+}
+ 
+# Summarize the data from each group
+healthy_df <- bind_rows(healthy_controls_data)
+summary_healthy <- healthy_df %>%
+  group_by(hour) %>%
+  summarise(mean(ENMO))
+
+depression_df <- bind_rows(depression_data)
+summary_depression <- depression_df %>%
+  group_by(hour) %>%
+  summarise(mean(ENMO))
+
+sleep_df <- bind_rows(sleep_disturbances_data)
+summary_sleep <- sleep_df %>%
+  group_by(hour) %>%
+  summarise(mean(ENMO))
+
+both_df <- bind_rows(both_data)
+summary_both <- both_df %>%
+  group_by(hour) %>%
+  summarise(mean(ENMO))
+
+# Plot the groups
+healthy_plot <- ggplot(summary_healthy, aes(x = hour, y = `mean(ENMO)`)) +
+  geom_col() +
+  labs(title = "Healthy controls", x = NULL, y = "Movement intensity")  +
+  theme(text = element_text(size=20),
+        axis.text.y = element_text(size = 12),
+        axis.text.x = element_text(size = 16))
+
+depression_plot <- ggplot(summary_depression, aes(x = hour, y = `mean(ENMO)`)) +
+  geom_col() +
+  labs(title = "Depression", x = NULL, y = NULL)  +
+  theme(text = element_text(size=20),
+        axis.text.y = element_text(size = 12),
+        axis.text.x = element_text(size = 16))
+
+sleep_plot <- ggplot(summary_sleep, aes(x = hour, y = `mean(ENMO)`)) +
+  geom_col() +
+  labs(title = "Sleep disturbances", x = "Time (start: 00:00)", y = "Movement intensity")  +
+  theme(text = element_text(size=20),
+        axis.text.y = element_text(size = 12),
+        axis.text.x = element_text(size = 16))
+
+both_plot <- ggplot(summary_both, aes(x = hour, y = `mean(ENMO)`)) +
+  geom_col() +
+  labs(title = "Both", x = "Time (start: 00:00)", y = NULL)  +
+  theme(text = element_text(size=20),
+        axis.text.y = element_text(size = 12),
+        axis.text.x = element_text(size = 16))
+
+# Combine the summarized plots from all four groups
+combined_plot3 <- (healthy_plot + depression_plot)/(sleep_plot + both_plot) +
+  plot_annotation(
+    title = "Actigraphy plot, average across days for all participants grouped by outcome",
+    theme = theme(plot.title = element_text(size = 30)))
