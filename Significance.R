@@ -1,7 +1,8 @@
-# Script to compare circadian rhythm features between outcome groups
+# Script to compare features between outcome groups
 # -------------------------------------
 # This script calculates the mean and standard deviation of all circadian rhythm features for all outcome groups,
-# and then performs a statistical test (t-test) to assess group differences.
+# and performs statistical tests (t-test, chi-squared) and effect size calculations (Cohen's d) 
+# to assess group differences across circadian rhythm features and covariates.
 # -------
 
 library(tidyverse)
