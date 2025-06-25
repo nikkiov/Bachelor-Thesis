@@ -1,7 +1,7 @@
-# Script that summarizes, processes and plots data from one (or three for comparison) for visualization purposes. 
+# Script that summarizes, processes and plots data from one (or three/four participants/groups for comparison) for visualization purposes. 
 # -------------------------------------
 # This script summarizes and processes data from one participant. It also plots them for visualization purposes in the thesis.
-# This script also plots data from three different participants to facilitate visual comparisons in the thesis. 
+# This script also plots data from three/four different participants/groups to facilitate visual comparisons in the thesis. 
 # For more information, see the SummaryRawData.R and CircadianFeaturesExtraction.R files.
 # -------------------------------------
 
