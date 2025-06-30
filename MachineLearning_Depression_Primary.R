@@ -72,15 +72,12 @@ circadian_data_plot <- circadian_data_plot %>%
     )
   )
 
-# Convert to percentage of group
+# Convert to percentage of covariate
 circadian_data_plot_percent <- circadian_data_plot %>%
-  group_by(depression, variable) %>%
-  mutate(total = n()) %>%
   group_by(depression, variable, value_label) %>%
-  summarise(count = n(), 
-            total = first(total)) %>%
-  ungroup() %>%
-  mutate(percentage = (count / total) * 100)
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(variable, value_label) %>%
+  mutate(percentage = (n / sum(n)) * 100)
 
 # Plot the covariates (except age) as column plots, together in one big plot
 circadian_data_plot_percent %>%
@@ -92,7 +89,7 @@ circadian_data_plot_percent %>%
     name = "Group"
   ) +
   facet_wrap(~ variable, scales = "free", ncol = 4, nrow = 2, labeller = labeller(variable = labels)) +
-  labs(fill = "Depression", x = NULL, y = "Percentage (%)", title = "Percentage distribution of covariates by depression group") +
+  labs(fill = "Depression", x = NULL, y = "Percentage (%)", title = "Depression prevalence across covariate groups") +
   theme(text = element_text(size = 20),
         axis.text.y = element_text(size = 12),
         axis.text.x = element_text(size = 12, angle = 45, vjust = 1, hjust = 1),
