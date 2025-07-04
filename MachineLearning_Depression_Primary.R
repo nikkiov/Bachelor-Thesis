@@ -420,7 +420,7 @@ collect_thresh <- collect %>%
     threshold = 0.5
   ))
 
-# Convert class probability estimates to class_pred objects and remove equivocal zones with a buffer of 0.1 around a threshold of 0.30 (best performance)
+# Convert class probability estimates to class_pred objects and remove equivocal zones with a buffer of 0.05 around a threshold of 0.6 (best performance)
 collect_pred <- collect %>%
   mutate(.pred = make_two_class_pred(
     estimate = .pred_Depression,
